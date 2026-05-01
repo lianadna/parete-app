@@ -15,7 +15,7 @@
   <div class="login-left">
     <div class="login-brand">
       <div class="login-logo">
-        pa<span class="dot"></span>rete
+        <img src="{{ asset('images/logo-white.png') }}" alt="Logo" style="height: 60px; margin-right: 12px;" />
       </div>
       <p class="login-tagline">Sistem Pelayanan & Informasi RT Digital</p>
     </div>

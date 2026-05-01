@@ -44,10 +44,10 @@ function renderSidebar(activeId) {
 
   return `
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">pa<span class="dot"></span>rete</div>
-      </div>
-      <nav class="sidebar-nav">${navHTML}</nav>
+    <div class="sidebar-header">
+      <img src="images/logo-blue.png" class="sidebar-logo" alt="Logo">
+    </div>      
+    <nav class="sidebar-nav">${navHTML}</nav>
       <div class="sidebar-footer">
         <div class="sidebar-user">
           <div class="user-avatar">SA</div>
@@ -64,27 +64,42 @@ function renderSidebar(activeId) {
 }
 
 /* ── Render Topbar ──────────────────────────────── */
-function renderTopbar(title) {
+function renderTopbar() {
   return `
     <header class="topbar">
-      <button class="topbar-btn" onclick="toggleSidebar()" style="display:none" id="menuBtn">
+
+      <!-- HAMBURGER (MOBILE ONLY) -->
+      <button class="topbar-btn mobile-only" onclick="toggleSidebar()" id="menuBtn">
         <i class="ph ph-list"></i>
       </button>
-      <div class="topbar-title">${title || 'Dashboard'}</div>
+
+      <!-- SEARCH -->
       <div class="topbar-search">
         <i class="ph ph-magnifying-glass search-icon"></i>
-        <input type="search" placeholder="Cari..." />
+        <input 
+          type="search" 
+          placeholder="Cari data..." 
+          id="globalSearch"
+          oninput="handleGlobalSearch(this.value)"
+        />
       </div>
+
+      <!-- ACTIONS -->
       <div class="topbar-actions">
+
         <button class="topbar-btn" title="Notifikasi">
           <i class="ph ph-bell"></i>
           <span class="notif-dot"></span>
         </button>
+
         <button class="topbar-btn" title="Tema">
           <i class="ph ph-moon"></i>
         </button>
+
         <div class="topbar-avatar" title="Profil">SA</div>
+
       </div>
+
     </header>`;
 }
 

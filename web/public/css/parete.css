@@ -7,12 +7,12 @@
 
 :root {
   /* Core Brand Colors - matches mobile */
-  --blue-primary:   #2196F3;
-  --blue-dark:      #1565C0;
-  --blue-darker:    #0D47A1;
+  --blue-primary:   #3581BA;
+  --blue-dark:      #1F3A60;
+  --blue-darker:    #11223a;
   --blue-light:     #E3F2FD;
   --blue-mid:       #BBDEFB;
-  --yellow-accent:  #FFC107;
+  --yellow-accent:  #F8CF59;
   --yellow-light:   #FFF8E1;
   --green-success:  #4CAF50;
   --green-light:    #E8F5E9;
@@ -348,29 +348,22 @@ input, textarea, select { font-family: inherit; outline: none; border: none; bac
 }
 
 .sidebar-logo {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--blue-primary);
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  letter-spacing: -0.5px;
-}
-
-.sidebar-logo .dot {
-  width: 7px;
-  height: 7px;
-  background: var(--yellow-accent);
-  border-radius: 50%;
-  display: inline-block;
-  margin: 0 2px;
+  height: 30px;
+  width: auto;
+  object-fit: contain;
+  display: block;
 }
 
 .sidebar-nav {
   flex: 1;
   padding: 16px 12px;
   overflow-y: auto;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* biar logo di tengah */
 }
 
 .nav-section-label {
@@ -490,29 +483,21 @@ input, textarea, select { font-family: inherit; outline: none; border: none; bac
 /* Topbar */
 .topbar {
   height: var(--topbar-h);
-  background: white;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--gray-100);
   display: flex;
   align-items: center;
-  padding: 0 28px;
+  justify-content: space-between;
+  padding: 0 20px;
   position: sticky;
   top: 0;
   z-index: 50;
-  gap: 16px;
-  box-shadow: var(--shadow-sm);
-}
-
-.topbar-title {
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--gray-800);
-  flex: 1;
 }
 
 .topbar-search {
   position: relative;
-  width: 280px;
+  width: 320px;
 }
 
 .topbar-search input {
@@ -523,29 +508,28 @@ input, textarea, select { font-family: inherit; outline: none; border: none; bac
   padding: 0 16px 0 40px;
   font-size: 13px;
   background: var(--gray-50);
-  color: var(--gray-800);
   transition: var(--transition);
 }
 
 .topbar-search input:focus {
   border-color: var(--blue-primary);
   background: white;
+  outline: none;
   box-shadow: 0 0 0 3px rgba(33,150,243,0.10);
 }
 
 .topbar-search .search-icon {
   position: absolute;
-  left: 13px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--gray-400);
-  font-size: 14px;
 }
 
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .topbar-btn {
@@ -590,6 +574,43 @@ input, textarea, select { font-family: inherit; outline: none; border: none; bac
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .topbar-search {
+    max-width: 100%;
+  }
+
+  .topbar-actions {
+    gap: 6px;
+  }
+
+  .topbar-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .topbar-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 12px;
+  }
+}
+/* default hidden */
+.mobile-only {
+  display: none;
+}
+
+/* show hamburger on mobile */
+@media (max-width: 900px) {
+  .mobile-only {
+    display: flex;
+  }
+
+  /* .topbar-search {
+    flex: 1;
+  } */
 }
 
 /* Page Body */
@@ -845,9 +866,16 @@ tbody tr:hover { background: var(--gray-50); }
 /* ─── Page Header ────────────────────────────────── */
 .page-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-header > div {
+  flex: 1;
+  min-width: 200px;
 }
 
 .page-header h1 {
@@ -855,12 +883,18 @@ tbody tr:hover { background: var(--gray-50); }
   font-size: 22px;
   font-weight: 700;
   color: var(--gray-900);
+  margin: 0;
 }
 
 .page-header p {
   font-size: 13px;
   color: var(--gray-500);
   margin-top: 2px;
+}
+
+.page-header .btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .breadcrumb {

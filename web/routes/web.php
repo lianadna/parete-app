@@ -2,30 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/', '/login');
 
-Route::get('/login', function () {
-    return view('login');
-});
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-});
-
-Route::get('/pengaduan', function () {
-    return view('pengaduan');
-});
-
-Route::get('/warga', function () {
-    return view('warga');
-});
-
-Route::get('/informasi', function () {
-    return view('informasi');
-});
-
-Route::get('/dokumen', function () {
-    return view('dokumen');
-});
+Route::get('/login', fn() => view('login'))->name('login');
+Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
+Route::get('/pengaduan', fn() => view('pengaduan'))->name('pengaduan');
+Route::get('/warga', fn() => view('warga'))->name('warga');
+Route::get('/informasi', fn() => view('informasi'))->name('informasi');
+Route::get('/dokumen', fn() => view('dokumen'))->name('dokumen');
+Route::get('/admin', fn() => view('admin'))->name('admin');

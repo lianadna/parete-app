@@ -9,7 +9,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\File;
 use Illuminate\View\View;
 
 class PengaduanController extends Controller
@@ -91,23 +90,24 @@ class PengaduanController extends Controller
 
         if ($new === 'Selesai') {
             $rules['catatan_selesai'] = ['required', 'string', 'max:5000'];
-            $rules['bukti_selesai'] = [
-                'required',
-                File::types([
-                    'jpeg', 'jpg', 'png', 'heic',
-                    'image/jpeg', 'image/png', 'image/heic', 'image/heif',
-                ])
-                    ->extensions(['jpg', 'jpeg', 'png', 'heic'])
-                    ->max(10240),
-            ];
+            $rules['bukti_selesai'] = ['required', 'file', 'max:10240', 'mimes:jpg,jpeg,png,heic,heif'];
         }
 
         if ($new === 'Ditolak') {
             $rules['alasan_ditolak'] = ['required', 'string', 'max:5000'];
         }
 
+        $messages = [
+            'bukti_selesai.required' => 'Bukti penyelesaian wajib diunggah.',
+            'bukti_selesai.uploaded' => 'Gagal mengunggah bukti. Pastikan ukuran file maks. 10 MB (JPG, PNG, atau HEIC).',
+            'bukti_selesai.max' => 'Ukuran bukti penyelesaian maksimal 10 MB.',
+            'bukti_selesai.mimes' => 'Format bukti harus JPG, JPEG, PNG, atau HEIC.',
+            'catatan_selesai.required' => 'Catatan penyelesaian wajib diisi.',
+            'alasan_ditolak.required' => 'Alasan penolakan wajib diisi.',
+        ];
+
         /** @var array<string, mixed> */
-        $validatedExtra = $rules !== [] ? $request->validate($rules) : [];
+        $validatedExtra = $rules !== [] ? $request->validate($rules, $messages) : [];
 
         if ($new === 'Selesai') {
             if ($model->bukti_penyelesaian && Storage::disk('public')->exists($model->bukti_penyelesaian)) {

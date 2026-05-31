@@ -26,6 +26,14 @@ class DataWarga extends Model
         'nomor_hp',
         'nama_pengguna',
         'status_akun',
+        'password',
+        'api_token',
+        'harus_ganti_password',
+    ];
+
+    protected $hidden = [
+        'password',
+        'api_token',
     ];
 
     public function pengaduan()

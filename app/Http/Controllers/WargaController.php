@@ -7,6 +7,7 @@ use App\Models\LogAktivitasAdmin;
 use App\Models\PengaduanWarga;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 use Throwable;
 
@@ -49,6 +50,8 @@ class WargaController extends Controller
 
         $seq = str_pad((string) (DataWarga::query()->count() + 1), 3, '0', STR_PAD_LEFT);
         $validated['id_keluarga'] = 'RT05-'.now()->format('Y').'-'.$seq;
+        $validated['password'] = Hash::make('warga123');
+        $validated['harus_ganti_password'] = true;
 
         DataWarga::query()->create($validated);
 

@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\DataWarga;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * @extends Factory<DataWarga>
@@ -31,6 +32,9 @@ class DataWargaFactory extends Factory
             'nomor_hp' => '+62 8'.fake()->numerify('## ### #### ###'),
             'nama_pengguna' => 'warga'.str_pad($noRumah, 3, '0', STR_PAD_LEFT),
             'status_akun' => fake()->randomElement(['Aktif', 'Aktif', 'Aktif', 'Nonaktif']),
+            'password' => Hash::make('warga123'),
+            'harus_ganti_password' => true,
+            'api_token' => null,
         ];
     }
 }

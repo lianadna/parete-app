@@ -69,18 +69,6 @@ function renderTopbar() {
         <i class="ph ph-list"></i>
       </button>
 
-      <!-- SEARCH -->
-      <div class="topbar-search">
-        <i class="ph ph-magnifying-glass search-icon"></i>
-        <input 
-          type="search" 
-          placeholder="Cari data..." 
-          id="globalSearch"
-          oninput="handleGlobalSearch(this.value)"
-        />
-      </div>
-
-      <!-- ACTIONS -->
       <div class="topbar-actions">
 
         <button class="topbar-btn" title="Notifikasi">
@@ -127,6 +115,28 @@ function initLayout(pageId, pageTitle) {
 
 function toggleSidebar() {
   document.getElementById('sidebar')?.classList.toggle('open');
+}
+
+/**
+ * Client-side filter: hide items, show empty element when none match.
+ * @returns {{ total: number, visible: number }}
+ */
+function applyClientFilter(itemSelector, emptyElId, matchFn) {
+  const items = document.querySelectorAll(itemSelector);
+  const emptyEl = emptyElId ? document.getElementById(emptyElId) : null;
+  let visible = 0;
+
+  items.forEach(el => {
+    const show = matchFn(el);
+    el.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+
+  if (emptyEl) {
+    emptyEl.style.display = items.length > 0 && visible === 0 ? '' : 'none';
+  }
+
+  return { total: items.length, visible };
 }
 
 /* ── Format Helpers ─────────────────────────────── */

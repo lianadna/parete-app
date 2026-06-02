@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DokumenRt;
 use App\Models\LogAktivitasAdmin;
+use App\Models\PermohonanDokumen;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -24,9 +25,21 @@ class DokumenController extends Controller
             'xls' => DokumenRt::query()->whereIn('tipe_berkas', ['xls', 'xlsx'])->count(),
         ];
 
+        $permohonans = PermohonanDokumen::query()->orderByDesc('tanggal_dibuat')->get();
+
+        $permohonanStats = [
+            'total' => PermohonanDokumen::query()->count(),
+            'terkirim' => PermohonanDokumen::query()->where('status_permohonan', 'Terkirim')->count(),
+            'diproses' => PermohonanDokumen::query()->where('status_permohonan', 'Diproses')->count(),
+            'selesai' => PermohonanDokumen::query()->where('status_permohonan', 'Selesai')->count(),
+        ];
+
         return view('dokumen', [
             'dokumens' => $dokumens,
             'stats' => $stats,
+            'permohonans' => $permohonans,
+            'permohonanStats' => $permohonanStats,
+            'activeTab' => request('tab', 'arsip'),
         ]);
     }
 

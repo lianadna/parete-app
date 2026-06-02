@@ -5,6 +5,7 @@
     'Diproses' => ['badge-blue', 'Diproses'],
     'Selesai' => ['badge-green', 'Selesai'],
     'Ditolak' => ['badge-red', 'Ditolak'],
+    'Dibatalkan' => ['badge-gray', 'Dibatalkan'],
     'Aktif' => ['badge-green', 'Aktif'],
     'Nonaktif' => ['badge-gray', 'Nonaktif'],
   ];

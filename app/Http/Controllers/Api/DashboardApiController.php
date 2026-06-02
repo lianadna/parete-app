@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DataWarga;
 use App\Models\InformasiRt;
 use App\Models\PengaduanWarga;
+use App\Support\ApiDate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -18,16 +19,11 @@ class DashboardApiController extends Controller
         $wargaId = (string) $warga->getKey();
 
         $informasiTerbaru = InformasiRt::query()
+            ->where('jenis_informasi', 'pengumuman')
             ->orderByDesc('tanggal_publikasi')
-            ->limit(3)
+            ->limit(5)
             ->get()
-            ->map(fn (InformasiRt $i) => [
-                'id' => (string) $i->getKey(),
-                'jenis_informasi' => $i->jenis_informasi,
-                'judul_informasi' => $i->judul_informasi,
-                'isi_informasi' => $i->isi_informasi,
-                'tanggal_publikasi' => optional($i->tanggal_publikasi)->toIso8601String(),
-            ]);
+            ->map(fn (InformasiRt $i) => $i->toApiArray());
 
         $pengaduanTerbaru = PengaduanWarga::query()
             ->where('referensi_warga_id', $wargaId)
@@ -39,7 +35,7 @@ class DashboardApiController extends Controller
                 'nomor_pengaduan' => $p->nomor_pengaduan,
                 'judul_pengaduan' => $p->judul_pengaduan,
                 'status_pengaduan' => $p->status_pengaduan,
-                'tanggal_dibuat' => optional($p->tanggal_dibuat)->toIso8601String(),
+                'tanggal_dibuat' => ApiDate::format($p->tanggal_dibuat),
             ]);
 
         return response()->json([

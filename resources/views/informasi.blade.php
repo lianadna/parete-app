@@ -53,8 +53,14 @@
         data-publikasi="{{ optional($info->tanggal_publikasi)->format('Y-m-d') }}"
         data-kegiatan="{{ optional($info->tanggal_kegiatan)->format('Y-m-d') }}"
         data-penulis="{{ $info->penulis }}"
+        data-gambar-url="{{ $info->gambarPublikUrl() ?? '' }}"
         onclick="showDetailInfo(this)"
       >
+        @if($info->gambar_informasi)
+          <div style="height:140px;overflow:hidden;background:var(--gray-100);">
+            <img src="{{ $info->gambarPublikUrl() }}" alt="" style="width:100%;height:100%;object-fit:cover;" />
+          </div>
+        @endif
         <div style="padding:20px 22px 16px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
             @if($info->jenis_informasi === 'pengumuman')
@@ -86,6 +92,12 @@
     @empty
       <div style="grid-column:1/-1"><div class="empty-state"><div class="empty-icon">📢</div><div class="empty-title">Belum ada informasi</div></div></div>
     @endforelse
+    <div id="infoEmptyFiltered" style="display:none;grid-column:1/-1;">
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">Data tidak ditemukan</div>
+      </div>
+    </div>
   </div>
 
   {!! $informasis->links('partials.pagination-parete') !!}
@@ -101,17 +113,17 @@
       <h3>Buat Informasi Baru</h3>
       <button type="button" class="modal-close" onclick="closeModal('addInfoModal')">×</button>
     </div>
-    <form method="post" action="{{ route('informasi.store') }}" class="modal-body">
+    <form method="post" action="{{ route('informasi.store') }}" class="modal-body" enctype="multipart/form-data">
       @csrf
       <div class="form-group">
         <label class="form-label">Tipe *</label>
-        <div style="display:flex;gap:8px;">
-          <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;border:1.5px solid var(--blue-primary);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:600;color:var(--blue-primary);background:var(--blue-light);">
-            <input type="radio" name="jenis_informasi" value="pengumuman" checked style="accent-color:var(--blue-primary);">
+        <div class="info-tipe-options">
+          <label class="info-tipe-option">
+            <input type="radio" name="jenis_informasi" value="pengumuman" checked>
             <i class="ph ph-megaphone-simple"></i> Pengumuman
           </label>
-          <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-600);">
-            <input type="radio" name="jenis_informasi" value="kegiatan" style="accent-color:var(--blue-primary);">
+          <label class="info-tipe-option">
+            <input type="radio" name="jenis_informasi" value="kegiatan">
             <i class="ph ph-calendar-check"></i> Kegiatan
           </label>
         </div>
@@ -138,6 +150,11 @@
         <label class="form-label">Penulis *</label>
         <input type="text" name="penulis" class="form-control-plain" required value="{{ old('penulis', 'Admin RT') }}" style="border-radius:var(--radius-sm);" />
       </div>
+      <div class="form-group">
+        <label class="form-label">Gambar pengumuman</label>
+        <input type="file" name="gambar_informasi" accept="image/jpeg,image/png,image/webp" class="form-control-plain" style="border-radius:var(--radius-sm);padding:10px;" />
+        <div style="font-size:11px;color:var(--gray-400);margin-top:6px;">JPG, PNG, atau WEBP · maks. 5 MB · tampil di banner aplikasi warga</div>
+      </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;">
         <button type="button" class="btn btn-outline" onclick="closeModal('addInfoModal')">Batal</button>
         <button type="submit" class="btn btn-blue"><i class="ph ph-paper-plane-tilt"></i> Publikasikan</button>
@@ -153,6 +170,9 @@
       <button type="button" class="modal-close" onclick="closeModal('detailInfoModal')">×</button>
     </div>
     <div class="modal-body">
+      <div id="diGambarWrap" style="display:none;margin-bottom:16px;border-radius:12px;overflow:hidden;max-height:220px;">
+        <img id="diGambar" src="" alt="Gambar pengumuman" style="width:100%;height:100%;object-fit:cover;display:block;" />
+      </div>
       <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;">
         <span id="diBadge"></span>
         <span style="font-size:12px;color:var(--gray-400);" id="diTanggal"></span>
@@ -171,7 +191,7 @@
       <h3>Edit Informasi</h3>
       <button type="button" class="modal-close" onclick="closeModal('editInfoModal')">×</button>
     </div>
-    <form id="formEditInfo" method="post" class="modal-body">
+    <form id="formEditInfo" method="post" class="modal-body" enctype="multipart/form-data">
       @csrf
       @method('PUT')
       <div class="form-group">
@@ -203,6 +223,14 @@
         <label class="form-label">Penulis *</label>
         <input type="text" name="penulis" id="editInfoPenulis" class="form-control-plain" required style="border-radius:var(--radius-sm);" />
       </div>
+      <div class="form-group">
+        <label class="form-label">Gambar pengumuman</label>
+        <div id="editInfoGambarPreview" style="display:none;margin-bottom:10px;border-radius:12px;overflow:hidden;border:1px solid var(--gray-200);max-height:180px;">
+          <img id="editInfoGambarImg" src="" alt="Gambar saat ini" style="width:100%;max-height:180px;object-fit:cover;display:block;" />
+        </div>
+        <input type="file" name="gambar_informasi" accept="image/jpeg,image/png,image/webp" class="form-control-plain" style="border-radius:var(--radius-sm);padding:10px;" />
+        <div style="font-size:11px;color:var(--gray-400);margin-top:6px;">Kosongkan jika tidak ingin mengganti gambar</div>
+      </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;">
         <button type="button" class="btn btn-outline" onclick="closeModal('editInfoModal')">Batal</button>
         <button type="submit" class="btn btn-blue">Simpan</button>
@@ -216,10 +244,10 @@
   initLayout('informasi', 'Informasi & Pengumuman');
 
   function filterInfo(val) {
-    const q = (val || '').toLowerCase();
-    document.querySelectorAll('.info-card').forEach(card => {
-      const blob = [card.dataset.judul, card.dataset.isi, card.dataset.penulis].join(' ').toLowerCase();
-      card.style.display = !q || blob.includes(q) ? '' : 'none';
+    const q = (val || '').trim().toLowerCase();
+    applyClientFilter('.info-card', 'infoEmptyFiltered', card => {
+      const blob = [card.dataset.judul, card.dataset.isi, card.dataset.penulis, card.dataset.jenis].join(' ').toLowerCase();
+      return !q || blob.includes(q);
     });
   }
 
@@ -229,6 +257,16 @@
     document.getElementById('diIsi').textContent = card.dataset.isi;
     const tgl = card.dataset.publikasi || '';
     document.getElementById('diTanggal').textContent = tgl + ' · ' + card.dataset.penulis;
+    const gambarWrap = document.getElementById('diGambarWrap');
+    const gambarImg = document.getElementById('diGambar');
+    const gambarUrl = card.dataset.gambarUrl || '';
+    if (gambarUrl) {
+      gambarWrap.style.display = 'block';
+      gambarImg.src = gambarUrl;
+    } else {
+      gambarWrap.style.display = 'none';
+      gambarImg.removeAttribute('src');
+    }
     const jenis = card.dataset.jenis;
     if (jenis === 'pengumuman') {
       document.getElementById('diBadge').innerHTML = '<span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--blue-dark);background:var(--blue-light);padding:4px 10px;border-radius:99px;">Pengumuman</span>';
@@ -248,6 +286,16 @@
     document.getElementById('editInfoPublikasi').value = card.dataset.publikasi || '';
     document.getElementById('editInfoKegiatan').value = card.dataset.kegiatan || '';
     document.getElementById('editInfoPenulis').value = card.dataset.penulis || '';
+    const gambarUrl = card.dataset.gambarUrl || '';
+    const preview = document.getElementById('editInfoGambarPreview');
+    const previewImg = document.getElementById('editInfoGambarImg');
+    if (gambarUrl) {
+      preview.style.display = 'block';
+      previewImg.src = gambarUrl;
+    } else {
+      preview.style.display = 'none';
+      previewImg.removeAttribute('src');
+    }
     openModal('editInfoModal');
   }
 </script>

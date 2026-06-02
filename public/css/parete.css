@@ -539,6 +539,7 @@ input, textarea, select { font-family: inherit; outline: none; border: none; bac
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-left: auto;
 }
 
 .topbar-btn {
@@ -1427,6 +1428,39 @@ tbody tr:hover { background: var(--gray-50); }
 ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
 
+/* ─── Informasi: pilihan tipe (radio card) ───────── */
+.info-tipe-options {
+  display: flex;
+  gap: 8px;
+}
+
+.info-tipe-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-600);
+  background: var(--white);
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.info-tipe-option:has(input:checked) {
+  border-color: var(--blue-primary);
+  background: var(--blue-light);
+  color: var(--blue-primary);
+  font-weight: 600;
+}
+
+.info-tipe-option input[type="radio"] {
+  accent-color: var(--blue-primary);
+}
+
 /* ─── Utilities ──────────────────────────────────── */
 .flex { display: flex; }
 .items-center { align-items: center; }
@@ -1447,3 +1481,23 @@ tbody tr:hover { background: var(--gray-50); }
 .font-bold { font-weight: 700; }
 .w-full { width: 100%; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ─── Nomor HP (+62) ─────────────────────────────── */
+.phone-prefix-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.phone-prefix-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: white;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--gray-800);
+  white-space: nowrap;
+}

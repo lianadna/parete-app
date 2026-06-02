@@ -30,6 +30,7 @@ class PengaduanController extends Controller
             'diproses' => PengaduanWarga::query()->where('status_pengaduan', 'Diproses')->count(),
             'selesai' => PengaduanWarga::query()->where('status_pengaduan', 'Selesai')->count(),
             'ditolak' => PengaduanWarga::query()->where('status_pengaduan', 'Ditolak')->count(),
+            'dibatalkan' => PengaduanWarga::query()->where('status_pengaduan', 'Dibatalkan')->count(),
         ];
 
         return view('pengaduan', [
@@ -73,7 +74,7 @@ class PengaduanController extends Controller
                 ->with('error', 'Buka pengaduan (ikon mata) terlebih dahulu untuk menandai sebagai diterima.');
         }
 
-        if (in_array($current, ['Selesai', 'Ditolak'], true)) {
+        if (in_array($current, ['Selesai', 'Ditolak', 'Dibatalkan'], true)) {
             return redirect()->route('pengaduan.index')
                 ->with('error', 'Pengaduan ini sudah tertutup dan tidak dapat diubah.');
         }

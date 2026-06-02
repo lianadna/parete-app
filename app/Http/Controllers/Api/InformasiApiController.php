@@ -20,7 +20,7 @@ class InformasiApiController extends Controller
             }
         }
 
-        $items = $query->get()->map(fn (InformasiRt $i) => $this->formatInformasi($i));
+        $items = $query->get()->map(fn (InformasiRt $i) => $i->toApiArray());
 
         return response()->json(['data' => $items]);
     }
@@ -29,20 +29,6 @@ class InformasiApiController extends Controller
     {
         $model = InformasiRt::query()->findOrFail($informasi);
 
-        return response()->json(['data' => $this->formatInformasi($model)]);
-    }
-
-    /** @return array<string, mixed> */
-    private function formatInformasi(InformasiRt $i): array
-    {
-        return [
-            'id' => (string) $i->getKey(),
-            'jenis_informasi' => $i->jenis_informasi,
-            'judul_informasi' => $i->judul_informasi,
-            'isi_informasi' => $i->isi_informasi,
-            'tanggal_publikasi' => optional($i->tanggal_publikasi)->toIso8601String(),
-            'tanggal_kegiatan' => optional($i->tanggal_kegiatan)->toIso8601String(),
-            'penulis' => $i->penulis,
-        ];
+        return response()->json(['data' => $model->toApiArray()]);
     }
 }

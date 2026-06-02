@@ -115,7 +115,7 @@
                   </div>
                 </td>
                 <td style="text-align:center;font-weight:600;">{{ $w->nomor_rumah }}</td>
-                <td style="font-size:13px;color:var(--gray-500);">{{ $w->nomor_hp ?? '-' }}</td>
+                <td style="font-size:13px;color:var(--gray-500);">{{ \App\Support\PhoneNumber::formatDisplay($w->nomor_hp) }}</td>
                 <td style="text-align:center;">
                   <span style="font-size:13px;font-weight:700;color:{{ ($w->jumlah_pengaduan ?? 0) > 0 ? 'var(--blue-primary)' : 'var(--gray-300)' }};">{{ $w->jumlah_pengaduan ?? 0 }}</span>
                 </td>
@@ -132,8 +132,16 @@
                 </td>
               </tr>
             @empty
-              <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Tidak ada data warga</div></div></td></tr>
+              <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Tidak ada data warga</div></div></td></tr>
             @endforelse
+            <tr id="wargaEmptyRow" style="display:none;">
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="empty-icon">🔍</div>
+                  <div class="empty-title">Data tidak ditemukan</div>
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -153,7 +161,7 @@
       <h3>Tambah Data Warga</h3>
       <button type="button" class="modal-close" onclick="closeModal('addWargaModal')">×</button>
     </div>
-    <form method="post" action="{{ route('warga.store') }}" class="modal-body">
+    <form id="formTambahWarga" method="post" action="{{ route('warga.store') }}" class="modal-body">
       @csrf
       <div class="alert-banner info" style="margin-bottom:16px;">
         <i class="ph ph-info"></i>
@@ -175,8 +183,12 @@
       </div>
       <div class="grid-2">
         <div class="form-group">
-          <label class="form-label" for="tambah_hp">No. HP / WhatsApp</label>
-          <input id="tambah_hp" name="nomor_hp" type="tel" class="form-control-plain" value="{{ old('nomor_hp') }}" style="border-radius:var(--radius-sm);" />
+          <label class="form-label">No. HP / WhatsApp</label>
+          <div class="phone-prefix-row">
+            <span class="phone-prefix-badge">🇮🇩 +62</span>
+            <input id="tambah_hp_local" type="tel" class="form-control-plain" placeholder="81291497170" value="{{ \App\Support\PhoneNumber::localPart(old('nomor_hp')) }}" style="border-radius:var(--radius-sm);flex:1;" />
+          </div>
+          <input type="hidden" name="nomor_hp" id="tambah_hp" value="{{ old('nomor_hp') }}" />
         </div>
         <div class="form-group">
           <label class="form-label" for="tambah_user">Username Login</label>
@@ -222,8 +234,12 @@
         <textarea name="alamat_lengkap" id="editAlamat" class="form-control-plain" rows="2" style="height:auto;padding:12px;border-radius:var(--radius-sm);"></textarea>
       </div>
       <div class="form-group">
-        <label class="form-label" for="editHp">No. HP</label>
-        <input type="tel" name="nomor_hp" id="editHp" class="form-control-plain" style="border-radius:var(--radius-sm);" />
+        <label class="form-label">No. HP</label>
+        <div class="phone-prefix-row">
+          <span class="phone-prefix-badge">🇮🇩 +62</span>
+          <input type="tel" id="editHpLocal" class="form-control-plain" placeholder="81291497170" style="border-radius:var(--radius-sm);flex:1;" />
+        </div>
+        <input type="hidden" name="nomor_hp" id="editHp" />
       </div>
       <div class="form-group">
         <label class="form-label" for="editUser">Username</label>
@@ -248,11 +264,47 @@
 <script>
   initLayout('warga', 'Data Warga');
 
+  function phoneLocalFromStored(hp) {
+    if (!hp || hp === '-') return '';
+    let d = String(hp).replace(/\D/g, '');
+    if (d.startsWith('62')) d = d.slice(2);
+    else if (d.startsWith('0')) d = d.slice(1);
+    return d;
+  }
+
+  function phoneToFull(local) {
+    let d = String(local || '').replace(/\D/g, '');
+    if (d.startsWith('62')) d = d.slice(2);
+    if (d.startsWith('0')) d = d.slice(1);
+    return d ? '+62' + d : '';
+  }
+
+  function bindPhoneForm(formId, localInputId, hiddenInputId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    form.addEventListener('submit', function () {
+      const local = document.getElementById(localInputId);
+      const hidden = document.getElementById(hiddenInputId);
+      if (local && hidden) {
+        hidden.value = phoneToFull(local.value);
+      }
+    });
+  }
+
+  bindPhoneForm('formTambahWarga', 'tambah_hp_local', 'tambah_hp');
+  bindPhoneForm('formEditWarga', 'editHpLocal', 'editHp');
+
   function filterWarga(val) {
-    const q = (val || '').toLowerCase();
-    document.querySelectorAll('#wargaTable tr[data-id]').forEach(tr => {
-      const blob = [tr.dataset.nama, tr.dataset.idKeluarga, tr.dataset.rumah].join(' ').toLowerCase();
-      tr.style.display = !q || blob.includes(q) ? '' : 'none';
+    const q = (val || '').trim().toLowerCase();
+    applyClientFilter('#wargaTable tr[data-id]', 'wargaEmptyRow', tr => {
+      const blob = [
+        tr.dataset.nama,
+        tr.dataset.idKeluarga,
+        tr.dataset.rumah,
+        tr.dataset.hp,
+        tr.dataset.user,
+      ].join(' ').toLowerCase();
+      return !q || blob.includes(q);
     });
   }
 
@@ -261,7 +313,8 @@
     document.getElementById('formEditWarga').action = '{{ url('/warga') }}/' + encodeURIComponent(id);
     document.getElementById('editNama').value = tr.dataset.nama;
     document.getElementById('editNoRumah').value = tr.dataset.rumah;
-    document.getElementById('editHp').value = tr.dataset.hp === '-' ? '' : tr.dataset.hp;
+    document.getElementById('editHpLocal').value = phoneLocalFromStored(tr.dataset.hp);
+    document.getElementById('editHp').value = phoneToFull(tr.dataset.hp);
     document.getElementById('editAlamat').value = tr.dataset.alamat || '';
     document.getElementById('editUser').value = tr.dataset.user || '';
     document.getElementById('editStatus').value = tr.dataset.status;

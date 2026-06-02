@@ -6,6 +6,8 @@ use App\Models\InformasiRt;
 use App\Models\LogAktivitasAdmin;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Throwable;
 
@@ -31,9 +33,16 @@ class InformasiController extends Controller
             'tanggal_publikasi' => ['required', 'date'],
             'tanggal_kegiatan' => ['nullable', 'date'],
             'penulis' => ['required', 'string', 'max:100'],
+            'gambar_informasi' => ['nullable', 'image', 'max:5120', 'mimes:jpg,jpeg,png,webp'],
         ]);
         if (empty($validated['tanggal_kegiatan'])) {
             $validated['tanggal_kegiatan'] = null;
+        }
+
+        if ($request->hasFile('gambar_informasi')) {
+            $validated['gambar_informasi'] = $this->simpanGambar($request->file('gambar_informasi'));
+        } else {
+            unset($validated['gambar_informasi']);
         }
 
         InformasiRt::query()->create($validated);
@@ -58,10 +67,18 @@ class InformasiController extends Controller
             'tanggal_publikasi' => ['required', 'date'],
             'tanggal_kegiatan' => ['nullable', 'date'],
             'penulis' => ['required', 'string', 'max:100'],
+            'gambar_informasi' => ['nullable', 'image', 'max:5120', 'mimes:jpg,jpeg,png,webp'],
         ]);
 
         if (empty($validated['tanggal_kegiatan'])) {
             $validated['tanggal_kegiatan'] = null;
+        }
+
+        if ($request->hasFile('gambar_informasi')) {
+            $this->hapusGambarLama($model->gambar_informasi);
+            $validated['gambar_informasi'] = $this->simpanGambar($request->file('gambar_informasi'));
+        } else {
+            unset($validated['gambar_informasi']);
         }
 
         $model->fill($validated);
@@ -75,7 +92,9 @@ class InformasiController extends Controller
     public function destroy(string $informasi): RedirectResponse
     {
         try {
-            InformasiRt::query()->findOrFail($informasi)->delete();
+            $model = InformasiRt::query()->findOrFail($informasi);
+            $this->hapusGambarLama($model->gambar_informasi);
+            $model->delete();
 
             LogAktivitasAdmin::catat('menghapus', 'informasi RT');
 
@@ -85,5 +104,24 @@ class InformasiController extends Controller
 
             return redirect()->route('informasi.index')->with('error', 'Data informasi RT gagal dihapus.');
         }
+    }
+
+    private function simpanGambar(UploadedFile $file): string
+    {
+        $path = $file->store('informasi_gambar', 'public');
+        if ($path === false) {
+            throw new \RuntimeException('Gagal menyimpan gambar pengumuman.');
+        }
+
+        return str_replace('\\', '/', $path);
+    }
+
+    private function hapusGambarLama(?string $path): void
+    {
+        if (empty($path) || str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return;
+        }
+
+        Storage::disk('public')->delete(str_replace('\\', '/', $path));
     }
 }

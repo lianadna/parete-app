@@ -76,8 +76,8 @@
   <style>
     .p-stats-summary{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:14px;color:var(--gray-600);}
     .p-stats-summary strong{font-variant-numeric:tabular-nums;font-weight:800;font-size:22px;color:var(--gray-900);font-family:var(--font-display);letter-spacing:-0.35px;margin-right:6px;}
-    .p-stats-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:20px;}
-    @media (max-width:1024px){.p-stats-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+    .p-stats-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:20px;}
+    @media (max-width:1200px){.p-stats-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
     @media (max-width:600px){.p-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
     .p-stat{background:#fff;border-radius:var(--radius-md);padding:14px 16px;border:1px solid var(--gray-100);display:flex;align-items:flex-start;gap:12px;min-height:92px;}
     .p-stat-icon{flex-shrink:0;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
@@ -132,6 +132,14 @@
         <div class="p-stat-hint">Dihentikan sesuai alasan</div>
       </div>
     </div>
+    <div class="p-stat">
+      <div class="p-stat-icon" style="background:#ECEFF1;color:#607D8B;"><i class="ph ph-prohibit"></i></div>
+      <div>
+        <div class="p-stat-val" style="color:#607D8B;">{{ $stats['dibatalkan'] }}</div>
+        <div class="p-stat-title">Dibatalkan</div>
+        <div class="p-stat-hint">Dibatalkan oleh warga</div>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -158,6 +166,7 @@
             <option>Diproses</option>
             <option>Selesai</option>
             <option>Ditolak</option>
+            <option>Dibatalkan</option>
           </select>
         </div>
       </div>
@@ -207,6 +216,14 @@
             @empty
               <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Tidak ada pengaduan</div></div></td></tr>
             @endforelse
+            <tr id="pengaduanEmptyRow" style="display:none;">
+              <td colspan="8">
+                <div class="empty-state">
+                  <div class="empty-icon">🔍</div>
+                  <div class="empty-title">Data tidak ditemukan</div>
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -322,6 +339,7 @@
       'Diproses': ['badge-blue', 'Diproses'],
       'Selesai': ['badge-green', 'Selesai'],
       'Ditolak': ['badge-red', 'Ditolak'],
+      'Dibatalkan': ['badge-gray', 'Dibatalkan'],
     };
     const [c, l] = map[status] || ['badge-gray', status];
     return `<span class="badge ${c}">${l}</span>`;
@@ -468,7 +486,7 @@
     }
 
     const blokForm = document.getElementById('blokFormProses');
-    if (['Selesai', 'Ditolak'].includes(st)) {
+    if (['Selesai', 'Ditolak', 'Dibatalkan'].includes(st)) {
       blokForm.style.display = 'none';
     } else {
       blokForm.style.display = 'block';
@@ -483,24 +501,34 @@
     openModal('detailModal');
   }
 
-  function filterTable(val) {
-    const q = (val || '').toLowerCase();
-    document.querySelectorAll('#pengaduanTable tr[data-id]').forEach(tr => {
-      const blob = [tr.dataset.judul, tr.dataset.warga, tr.dataset.nomor].join(' ').toLowerCase();
-      tr.style.display = !q || blob.includes(q) ? '' : 'none';
+  let pengaduanSearch = '';
+  let pengaduanTopik = '';
+  let pengaduanStatus = '';
+
+  function applyPengaduanFilters() {
+    const q = pengaduanSearch.trim().toLowerCase();
+    applyClientFilter('#pengaduanTable tr[data-id]', 'pengaduanEmptyRow', tr => {
+      const blob = [tr.dataset.judul, tr.dataset.warga, tr.dataset.nomor, tr.dataset.topik, tr.dataset.lokasi].join(' ').toLowerCase();
+      const matchSearch = !q || blob.includes(q);
+      const matchTopik = !pengaduanTopik || tr.dataset.topik === pengaduanTopik;
+      const matchStatus = !pengaduanStatus || tr.dataset.status === pengaduanStatus;
+      return matchSearch && matchTopik && matchStatus;
     });
+  }
+
+  function filterTable(val) {
+    pengaduanSearch = val || '';
+    applyPengaduanFilters();
   }
 
   function filterTopik(val) {
-    document.querySelectorAll('#pengaduanTable tr[data-id]').forEach(tr => {
-      tr.style.display = !val || tr.dataset.topik === val ? '' : 'none';
-    });
+    pengaduanTopik = val || '';
+    applyPengaduanFilters();
   }
 
   function filterStatus(val) {
-    document.querySelectorAll('#pengaduanTable tr[data-id]').forEach(tr => {
-      tr.style.display = !val || tr.dataset.status === val ? '' : 'none';
-    });
+    pengaduanStatus = val || '';
+    applyPengaduanFilters();
   }
 </script>
 </body>

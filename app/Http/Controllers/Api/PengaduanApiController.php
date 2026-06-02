@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\DataWarga;
 use App\Models\PengaduanWarga;
+use App\Support\ApiDate;
+use App\Support\MediaUrl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +27,7 @@ class PengaduanApiController extends Controller
             if ($status === 'aktif') {
                 $query->whereIn('status_pengaduan', ['Terkirim', 'Diterima', 'Diproses']);
             } elseif ($status === 'selesai') {
-                $query->whereIn('status_pengaduan', ['Selesai', 'Ditolak']);
+                $query->whereIn('status_pengaduan', ['Selesai', 'Ditolak', 'Dibatalkan']);
             } else {
                 $query->where('status_pengaduan', $status);
             }
@@ -88,6 +90,98 @@ class PengaduanApiController extends Controller
         return response()->json(['data' => $this->formatPengaduan($model)]);
     }
 
+    public function update(Request $request, string $pengaduan): JsonResponse
+    {
+        /** @var DataWarga $warga */
+        $warga = $request->attributes->get('warga');
+
+        $model = PengaduanWarga::query()
+            ->where('_id', $pengaduan)
+            ->where('referensi_warga_id', (string) $warga->getKey())
+            ->firstOrFail();
+
+        $this->assertStatusTerkirim($model->status_pengaduan, 'Pengaduan');
+
+        $validated = $request->validate([
+            'topik' => ['required', 'in:Infrastruktur,Kebersihan,Keamanan,Sosial,Lainnya'],
+            'judul_pengaduan' => ['required', 'string', 'max:200'],
+            'deskripsi' => ['required', 'string', 'max:5000'],
+            'lokasi_kejadian' => ['required', 'string', 'max:300'],
+            'lampiran' => ['nullable', 'array', 'max:3'],
+            'lampiran.*' => ['file', 'max:10240', 'mimes:jpg,jpeg,png,heic,heif'],
+            'ganti_lampiran' => ['nullable', 'boolean'],
+        ]);
+
+        $model->judul_pengaduan = $validated['judul_pengaduan'];
+        $model->topik = $validated['topik'];
+        $model->lokasi_kejadian = $validated['lokasi_kejadian'];
+        $model->deskripsi = $validated['deskripsi'];
+
+        if ($request->boolean('ganti_lampiran') && $request->hasFile('lampiran')) {
+            $this->hapusLampiran($model->lampiran_gambar ?? []);
+            $paths = [];
+            foreach ($request->file('lampiran') as $file) {
+                $paths[] = $file->store('pengaduan_lampiran', 'public');
+            }
+            $model->lampiran_gambar = $paths;
+        } elseif ($request->hasFile('lampiran')) {
+            $existing = $model->lampiran_gambar ?? [];
+            $newFiles = $request->file('lampiran');
+            if (count($existing) + count($newFiles) > 3) {
+                return response()->json(['message' => 'Maksimal 3 foto lampiran.'], 422);
+            }
+            foreach ($newFiles as $file) {
+                $existing[] = $file->store('pengaduan_lampiran', 'public');
+            }
+            $model->lampiran_gambar = $existing;
+        }
+
+        $model->save();
+
+        return response()->json([
+            'message' => 'Pengaduan berhasil diperbarui.',
+            'data' => $this->formatPengaduan($model),
+        ]);
+    }
+
+    public function batalkan(Request $request, string $pengaduan): JsonResponse
+    {
+        /** @var DataWarga $warga */
+        $warga = $request->attributes->get('warga');
+
+        $model = PengaduanWarga::query()
+            ->where('_id', $pengaduan)
+            ->where('referensi_warga_id', (string) $warga->getKey())
+            ->firstOrFail();
+
+        $this->assertStatusTerkirim($model->status_pengaduan, 'Pengaduan');
+
+        $model->status_pengaduan = 'Dibatalkan';
+        $model->save();
+
+        return response()->json([
+            'message' => 'Pengaduan berhasil dibatalkan.',
+            'data' => $this->formatPengaduan($model),
+        ]);
+    }
+
+    private function assertStatusTerkirim(?string $status, string $label): void
+    {
+        if ($status !== 'Terkirim') {
+            abort(422, "{$label} hanya dapat diubah atau dibatalkan saat status Terkirim.");
+        }
+    }
+
+    /** @param  array<int, string>  $paths */
+    private function hapusLampiran(array $paths): void
+    {
+        foreach ($paths as $path) {
+            if (is_string($path) && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+    }
+
     private function generateNomorPengaduan(): string
     {
         $max = PengaduanWarga::query()
@@ -107,16 +201,13 @@ class PengaduanApiController extends Controller
     /** @return array<string, mixed> */
     private function formatPengaduan(PengaduanWarga $p): array
     {
-        $baseUrl = rtrim(config('app.url'), '/');
-
         $lampiran = collect($p->lampiran_gambar ?? [])
-            ->map(fn ($path) => $baseUrl.'/storage/'.$path)
+            ->map(fn ($path) => MediaUrl::fromPublicDisk(is_string($path) ? $path : null))
+            ->filter()
             ->values()
             ->all();
 
-        $bukti = $p->bukti_penyelesaian
-            ? $baseUrl.'/storage/'.$p->bukti_penyelesaian
-            : null;
+        $bukti = MediaUrl::fromPublicDisk($p->bukti_penyelesaian);
 
         return [
             'id' => (string) $p->getKey(),
@@ -130,7 +221,9 @@ class PengaduanApiController extends Controller
             'catatan_selesai' => $p->catatan_selesai,
             'bukti_penyelesaian' => $bukti,
             'alasan_ditolak' => $p->alasan_ditolak,
-            'tanggal_dibuat' => optional($p->tanggal_dibuat)->toIso8601String(),
+            'tanggal_dibuat' => ApiDate::format($p->tanggal_dibuat),
+            'can_edit' => $p->status_pengaduan === 'Terkirim',
+            'can_batalkan' => $p->status_pengaduan === 'Terkirim',
         ];
     }
 }

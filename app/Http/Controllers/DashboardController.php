@@ -52,8 +52,9 @@ class DashboardController extends Controller
         $diterima = PengaduanWarga::query()->where('status_pengaduan', 'Diterima')->count();
         $terkirim = PengaduanWarga::query()->where('status_pengaduan', 'Terkirim')->count();
         $ditolak = PengaduanWarga::query()->where('status_pengaduan', 'Ditolak')->count();
+        $dibatalkan = PengaduanWarga::query()->where('status_pengaduan', 'Dibatalkan')->count();
 
-        $statusTotals = compact('terkirim', 'diterima', 'diproses', 'selesai', 'ditolak');
+        $statusTotals = compact('terkirim', 'diterima', 'diproses', 'selesai', 'ditolak', 'dibatalkan');
 
         $logAktivitas = LogAktivitasAdmin::query()
             ->orderByDesc('waktu')

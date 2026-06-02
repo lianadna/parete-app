@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DataWarga;
 use App\Models\LogAktivitasAdmin;
 use App\Models\PengaduanWarga;
+use App\Support\PhoneNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,11 +14,24 @@ use Throwable;
 
 class WargaController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $wargas = DataWarga::query()
-            ->orderByDesc('tanggal_dibuat')
-            ->paginate(10);
+        $search = trim((string) $request->query('q', ''));
+
+        $query = DataWarga::query()->orderByDesc('tanggal_dibuat');
+
+        if ($search !== '') {
+            $pattern = new \MongoDB\BSON\Regex(preg_quote($search, '/'), 'i');
+            $query->where(function ($builder) use ($pattern) {
+                $builder->where('nama_kepala_keluarga', 'regex', $pattern)
+                    ->orWhere('id_keluarga', 'regex', $pattern)
+                    ->orWhere('nomor_rumah', 'regex', $pattern)
+                    ->orWhere('nomor_hp', 'regex', $pattern)
+                    ->orWhere('nama_pengguna', 'regex', $pattern);
+            });
+        }
+
+        $wargas = $query->paginate(10)->withQueryString();
 
         foreach ($wargas as $w) {
             $w->jumlah_pengaduan = PengaduanWarga::query()
@@ -52,6 +66,7 @@ class WargaController extends Controller
         $validated['id_keluarga'] = 'RT05-'.now()->format('Y').'-'.$seq;
         $validated['password'] = Hash::make('warga123');
         $validated['harus_ganti_password'] = true;
+        $validated['nomor_hp'] = PhoneNumber::normalize($validated['nomor_hp'] ?? null);
 
         DataWarga::query()->create($validated);
 
@@ -73,6 +88,7 @@ class WargaController extends Controller
             'status_akun' => ['required', 'in:Aktif,Nonaktif'],
         ]);
 
+        $validated['nomor_hp'] = PhoneNumber::normalize($validated['nomor_hp'] ?? null);
         $model->fill($validated);
         $model->save();
 

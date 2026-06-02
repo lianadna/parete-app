@@ -182,6 +182,7 @@
                 ['Diterima', $statusTotals['diterima'], 'var(--orange-warn)'],
                 ['Terkirim', $statusTotals['terkirim'], 'var(--gray-400)'],
                 ['Ditolak', $statusTotals['ditolak'], '#C62828'],
+                ['Dibatalkan', $statusTotals['dibatalkan'], '#607D8B'],
               ] as [$label, $nilai, $warna])
                 <div>
                   <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;">

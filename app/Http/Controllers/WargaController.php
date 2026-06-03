@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\DataWarga;
 use App\Models\LogAktivitasAdmin;
 use App\Models\PengaduanWarga;
+use App\Models\ProfilRt;
 use App\Support\PhoneNumber;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 use Throwable;
@@ -17,8 +22,53 @@ class WargaController extends Controller
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('q', ''));
+        $wargas = $this->wargaQuery($search)->paginate(10)->withQueryString();
+        $this->attachPengaduanCounts($wargas);
 
-        $query = DataWarga::query()->orderByDesc('tanggal_dibuat');
+        $stats = [
+            'total' => DataWarga::query()->count(),
+            'aktif' => DataWarga::query()->where('status_akun', 'Aktif')->count(),
+            'nonaktif' => DataWarga::query()->where('status_akun', 'Nonaktif')->count(),
+        ];
+
+        return view('warga', [
+            'wargas' => $wargas,
+            'stats' => $stats,
+        ]);
+    }
+
+    public function exportPdf(Request $request): Response
+    {
+        $search = trim((string) $request->query('q', ''));
+        $wargas = $this->wargaQuery($search)->get();
+        $this->attachPengaduanCounts($wargas);
+
+        $profil = ProfilRt::current();
+
+        $pdf = Pdf::loadView('warga.pdf', [
+            'wargas' => $wargas,
+            'profil' => $profil,
+            'adminNama' => Auth::user()->nama,
+            'search' => $search,
+            'exportedAt' => now()->timezone(config('app.timezone', 'Asia/Jakarta')),
+            'stats' => [
+                'total' => $wargas->count(),
+                'aktif' => $wargas->where('status_akun', 'Aktif')->count(),
+                'nonaktif' => $wargas->where('status_akun', 'Nonaktif')->count(),
+            ],
+        ])->setPaper('a4', 'landscape');
+
+        LogAktivitasAdmin::catat('mengekspor', 'data warga (PDF)');
+
+        $filename = 'data-warga-'.str_pad((string) $profil->nomor_rt, 2, '0', STR_PAD_LEFT).'-'.now()->format('Y-m-d-His').'.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /** @return Builder<DataWarga> */
+    private function wargaQuery(string $search = ''): Builder
+    {
+        $query = DataWarga::query()->orderBy('nomor_rumah');
 
         if ($search !== '') {
             $pattern = new \MongoDB\BSON\Regex(preg_quote($search, '/'), 'i');
@@ -31,24 +81,17 @@ class WargaController extends Controller
             });
         }
 
-        $wargas = $query->paginate(10)->withQueryString();
+        return $query;
+    }
 
+    /** @param iterable<DataWarga> $wargas */
+    private function attachPengaduanCounts(iterable $wargas): void
+    {
         foreach ($wargas as $w) {
             $w->jumlah_pengaduan = PengaduanWarga::query()
                 ->where('referensi_warga_id', (string) $w->getKey())
                 ->count();
         }
-
-        $stats = [
-            'total' => DataWarga::query()->count(),
-            'aktif' => DataWarga::query()->where('status_akun', 'Aktif')->count(),
-            'nonaktif' => DataWarga::query()->where('status_akun', 'Nonaktif')->count(),
-        ];
-
-        return view('warga', [
-            'wargas' => $wargas,
-            'stats' => $stats,
-        ]);
     }
 
     public function store(Request $request): RedirectResponse

@@ -7,10 +7,9 @@
   <link rel="stylesheet" href="{{ asset('css/parete.css') }}" />
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js" defer></script>
 </head>
-<body>
+<body data-open-add-admin-modal="{{ ($errors->any() && (old('username') || old('nama'))) ? '1' : '0' }}">
 
 @include('partials.app-open')
-
   @if(session('success'))
     <div class="alert-banner info" style="margin-bottom:16px;"><i class="ph ph-check-circle"></i><span>{{ session('success') }}</span></div>
   @endif
@@ -41,9 +40,9 @@
         <table>
           <thead>
             <tr>
+              <th>Nama</th>
               <th>Username</th>
               <th>Password</th>
-              <th>Nama</th>
               <th style="width:80px;text-align:center;">Aksi</th>
             </tr>
           </thead>
@@ -51,14 +50,17 @@
             @forelse($admins as $admin)
               <tr data-admin-id="{{ $admin->getKey() }}" data-admin-nama="{{ $admin->nama }}">
                 <td>
+                  <span style="font-weight:500;">{{ $admin->nama }}</span>
+                  @if((string) $admin->getKey() === $authAdminId)
+                    <span class="badge badge-blue" style="margin-left:8px;font-size:10px;">Anda</span>
+                  @endif
+                </td>
+                <td>
                   <div class="admin-secret-cell">
                     <span class="admin-secret-value masked" data-field="username">****</span>
                     <button type="button" class="btn btn-outline btn-sm btn-icon admin-reveal-btn" data-field="username" title="Tampilkan username">
                       <i class="ph ph-eye"></i>
                     </button>
-                    @if((string) $admin->getKey() === $authAdminId)
-                      <span class="badge badge-blue" style="margin-left:4px;font-size:10px;">Anda</span>
-                    @endif
                   </div>
                 </td>
                 <td>
@@ -69,7 +71,6 @@
                     </button>
                   </div>
                 </td>
-                <td style="font-weight:500;">{{ $admin->nama }}</td>
                 <td style="text-align:center;">
                   @if((string) $admin->getKey() === $authAdminId)
                     <button type="button" class="btn btn-outline btn-sm btn-icon" disabled title="Tidak dapat menghapus akun sendiri">
@@ -303,9 +304,9 @@
     }
   });
 
-  @if($errors->any() && (old('username') || old('nama')))
+  if (document.body.dataset.openAddAdminModal === '1') {
     openModal('addAdminModal');
-  @endif
+  }
 </script>
 </body>
 </html>

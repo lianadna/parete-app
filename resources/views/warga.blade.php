@@ -75,8 +75,9 @@
           <i class="ph ph-magnifying-glass icon"></i>
           <input type="search" placeholder="Cari nama, ID, nomor rumah..." oninput="filterWarga(this.value)" />
         </div>
-        <button type="button" class="btn btn-outline btn-sm"><i class="ph ph-export"></i> Export</button>
-        <button type="button" class="btn btn-outline btn-sm"><i class="ph ph-printer"></i> Cetak</button>
+        <a href="{{ route('warga.export.pdf', request()->only('q')) }}" class="btn btn-outline btn-sm" title="Export PDF">
+          <i class="ph ph-file-pdf"></i> Export PDF
+        </a>
       </div>
 
       <div class="table-wrap">

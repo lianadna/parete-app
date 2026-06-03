@@ -112,15 +112,7 @@
           </div>
         </div>
 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray-600);cursor:pointer;">
-            <input type="checkbox" name="remember" style="accent-color:var(--blue-primary);width:15px;height:15px;" />
-            Ingat saya
-          </label>
-          <a href="#" style="font-size:13px;color:var(--blue-primary);font-weight:500;">Lupa kata sandi?</a>
-        </div>
-
-        <button type="submit" class="btn-primary" id="loginBtn">
+        <button type="submit" class="btn-primary" id="loginBtn" style="margin-top:8px;">
           <i class="ph ph-sign-in"></i>
           Masuk
         </button>

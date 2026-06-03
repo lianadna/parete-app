@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profil-rt', [ProfilRtController::class, 'edit'])->name('profil-rt.edit');
     Route::put('/profil-rt', [ProfilRtController::class, 'update'])->name('profil-rt.update');
 
+    Route::get('warga/export/pdf', [WargaController::class, 'exportPdf'])->name('warga.export.pdf');
     Route::resource('warga', WargaController::class)->only(['index', 'store', 'update', 'destroy']);
 
     Route::post('pengaduan/{pengaduan}/dibuka', [PengaduanController::class, 'markDibuka'])->name('pengaduan.dibuka');

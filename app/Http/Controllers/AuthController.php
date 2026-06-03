@@ -35,7 +35,7 @@ class AuthController extends Controller
                 ->with('login_error', 'Username atau kata sandi salah. Silakan coba lagi.');
         }
 
-        Auth::login($admin, $request->boolean('remember'));
+        Auth::login($admin);
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));

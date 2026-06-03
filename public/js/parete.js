@@ -7,18 +7,28 @@
 /* ── Sidebar Navigation Config (paths = routes/web.php) ─────────────────── */
 const NAV_ITEMS = [
   { section: 'Menu Utama' },
-  { id: 'dashboard',  label: 'Dashboard',     icon: 'ph-squares-four',       href: '/dashboard' },
-  { id: 'admin',      label: 'Manajemen Admin', icon: 'ph-shield-check',     href: '/admin' },
-  { id: 'warga',      label: 'Data Warga',    icon: 'ph-users-three',        href: '/warga' },
-  { id: 'pengaduan',  label: 'Pengaduan',     icon: 'ph-clipboard-text',     href: '/pengaduan' },
-  { id: 'informasi',  label: 'Informasi',     icon: 'ph-megaphone-simple',   href: '/informasi' },
-  { id: 'dokumen',    label: 'Dokumen',       icon: 'ph-files',              href: '/dokumen' },
+  { id: 'dashboard',  label: 'Dashboard',       icon: 'ph-squares-four',       href: '/dashboard' },
+  { id: 'admin',      label: 'Kelola Admin',    icon: 'ph-shield-check',       href: '/admin/register' },
+  { id: 'warga',      label: 'Data Warga',      icon: 'ph-users-three',        href: '/warga' },
+  { id: 'pengaduan',  label: 'Pengaduan',       icon: 'ph-clipboard-text',     href: '/pengaduan' },
+  { id: 'informasi',  label: 'Informasi',       icon: 'ph-megaphone-simple',   href: '/informasi' },
+  { id: 'profil-rt',  label: 'Profil RT',       icon: 'ph-buildings',          href: '/profil-rt' },
+  { id: 'dokumen',    label: 'Dokumen',         icon: 'ph-files',              href: '/dokumen' },
 ];
 
+function getAuthContext() {
+  const root = document.getElementById('app');
+  const nama = root?.dataset?.adminNama || 'Admin';
+  const username = root?.dataset?.adminUsername || 'admin';
+  const initials = nama.trim().slice(0, 2).toUpperCase() || 'AD';
+
+  return { nama, username, initials };
+}
+
 /* ── Render Sidebar ─────────────────────────────── */
-function renderSidebar(activeId) {
-  const segment = window.location.pathname.replace(/\/+$/, '').split('/').pop() || '';
-  const currentPage = activeId || segment || 'dashboard';
+function renderSidebar(activeId, auth, csrfToken) {
+  const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  const currentPage = activeId || 'dashboard';
 
   let navHTML = '';
   for (const item of NAV_ITEMS) {
@@ -26,7 +36,7 @@ function renderSidebar(activeId) {
       navHTML += `<div class="nav-section-label">${item.section}</div>`;
       continue;
     }
-    const isActive = item.id === currentPage;
+    const isActive = item.id === currentPage || (item.href && path.startsWith(item.href));
     const badgeHTML = item.badge
       ? `<span class="nav-badge">${item.badge}</span>`
       : '';
@@ -42,46 +52,44 @@ function renderSidebar(activeId) {
     <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <img src="/images/logo-blue.png" class="sidebar-logo" alt="Logo">
-    </div>      
+    </div>
     <nav class="sidebar-nav">${navHTML}</nav>
       <div class="sidebar-footer">
-        <div class="sidebar-user">
-          <div class="user-avatar">SA</div>
-          <div class="user-info">
-            <strong>Super Admin</strong>
-            <span>admin_sistem</span>
+        <form method="post" action="/logout" style="margin:0;">
+          <input type="hidden" name="_token" value="${csrfToken}">
+          <div class="sidebar-user">
+            <div class="user-avatar">${auth.initials}</div>
+            <div class="user-info">
+              <strong>${auth.nama}</strong>
+              <span>${auth.username}</span>
+            </div>
+            <button type="submit" title="Keluar" style="background:none;border:none;color:var(--gray-400);font-size:15px;margin-left:auto;cursor:pointer;padding:0;">
+              <i class="ph ph-sign-out"></i>
+            </button>
           </div>
-          <a href="/login" title="Keluar" style="color:var(--gray-400);font-size:15px;margin-left:auto;">
-            <i class="ph ph-sign-out"></i>
-          </a>
-        </div>
+        </form>
       </div>
     </aside>`;
 }
 
 /* ── Render Topbar ──────────────────────────────── */
-function renderTopbar() {
+function renderTopbar(auth) {
   return `
     <header class="topbar">
 
-      <!-- HAMBURGER (MOBILE ONLY) -->
       <button class="topbar-btn mobile-only" onclick="toggleSidebar()" id="menuBtn">
         <i class="ph ph-list"></i>
       </button>
 
       <div class="topbar-actions">
-
         <button class="topbar-btn" title="Notifikasi">
           <i class="ph ph-bell"></i>
           <span class="notif-dot"></span>
         </button>
-
         <button class="topbar-btn" title="Tema">
           <i class="ph ph-moon"></i>
         </button>
-
-        <div class="topbar-avatar" title="Profil">SA</div>
-
+        <div class="topbar-avatar" title="${auth.nama}">${auth.initials}</div>
       </div>
 
     </header>`;
@@ -92,19 +100,23 @@ function initLayout(pageId, pageTitle) {
   const root = document.getElementById('app');
   if (!root) return;
 
+  const auth = getAuthContext();
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+    || document.querySelector('#app input[name="_token"]')?.value
+    || document.querySelector('input[name="_token"]')?.value
+    || '';
   const pageContent = root.innerHTML;
   root.innerHTML = `
     <div class="admin-layout">
-      ${renderSidebar(pageId)}
+      ${renderSidebar(pageId, auth, csrfToken)}
       <div class="main-content">
-        ${renderTopbar(pageTitle)}
+        ${renderTopbar(auth)}
         <div class="page-body" id="pageBody">
           ${pageContent}
         </div>
       </div>
     </div>`;
 
-  // Responsive menu button visibility
   function checkWidth() {
     const btn = document.getElementById('menuBtn');
     if (btn) btn.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
@@ -178,7 +190,6 @@ function closeModal(modalId) {
   if (el) el.style.display = 'none';
 }
 
-// Close modal on overlay click
 document.addEventListener('click', function(e) {
   if (e.target.classList.contains('modal-overlay')) {
     e.target.style.display = 'none';

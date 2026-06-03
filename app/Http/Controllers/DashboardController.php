@@ -6,6 +6,7 @@ use App\Models\DataWarga;
 use App\Models\DokumenRt;
 use App\Models\LogAktivitasAdmin;
 use App\Models\PengaduanWarga;
+use App\Models\ProfilRt;
 use Carbon\Carbon;
 use Illuminate\View\View;
 
@@ -61,6 +62,8 @@ class DashboardController extends Controller
             ->limit(25)
             ->get();
 
+        $profilRt = ProfilRt::current();
+
         return view('dashboard', [
             'currentYear' => $year,
             'chartData' => $pengPerBulan,
@@ -74,6 +77,7 @@ class DashboardController extends Controller
             'pengTerbaru' => $pengTerbaru,
             'statusTotals' => $statusTotals,
             'logAktivitas' => $logAktivitas,
+            'profilRt' => $profilRt,
         ]);
     }
 }

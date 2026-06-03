@@ -21,7 +21,7 @@
   };
 @endphp
 
-<div id="app">
+@include('partials.app-open')
 
   @if(session('success'))
     <div class="alert-banner info" style="margin-bottom:16px;"><i class="ph ph-check-circle"></i><span>{{ session('success') }}</span></div>

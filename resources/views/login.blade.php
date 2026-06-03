@@ -59,13 +59,20 @@
       <h2>Selamat Datang 👋</h2>
       <p>Masuk ke panel admin Parete untuk mengelola layanan RT Anda.</p>
 
-      <!-- Alert: error (hidden by default) -->
+      @if(session('login_error'))
+      <div class="alert-banner warning" id="loginError">
+        <i class="ph ph-warning-circle"></i>
+        <span>{{ session('login_error') }}</span>
+      </div>
+      @else
       <div class="alert-banner warning" id="loginError" style="display:none">
         <i class="ph ph-warning-circle"></i>
         <span>Username atau kata sandi salah. Silakan coba lagi.</span>
       </div>
+      @endif
 
-      <form id="loginForm" novalidate>
+      <form id="loginForm" method="post" action="{{ route('login.submit') }}" novalidate>
+        @csrf
         <div class="form-group">
           <label class="form-label" for="username">Username</label>
           <div class="form-input-wrap">
@@ -77,6 +84,7 @@
               class="form-control"
               placeholder="Masukkan username"
               autocomplete="username"
+              value="{{ old('username') }}"
               required
             />
           </div>
@@ -140,14 +148,10 @@
     }
   }
 
-  document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+  document.getElementById('loginForm').addEventListener('submit', function() {
     const btn = document.getElementById('loginBtn');
     btn.innerHTML = '<i class="ph ph-spinner"></i> Memverifikasi...';
     btn.disabled = true;
-    setTimeout(() => {
-      window.location.href = @json(route('dashboard'));
-    }, 1000);
   });
 </script>
 

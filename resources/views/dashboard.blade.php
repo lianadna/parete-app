@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<div id="app">
+@include('partials.app-open')
   <div class="page-header" style="flex-wrap:wrap;align-items:flex-start;">
     <div>
       <div class="breadcrumb">
@@ -18,7 +18,7 @@
         <span>Dashboard</span>
       </div>
       <h1>Dashboard</h1>
-      <p>Ringkasan aktivitas RT 05 Malabar Ujung</p>
+      <p>Ringkasan aktivitas {{ $profilRt->labelRt() }} {{ $profilRt->kelurahan }}</p>
     </div>
     <div class="dash-clock" aria-live="polite">
       <div class="dash-clock-kicker"><i class="ph ph-clock" style="margin-right:4px;"></i> Waktu sekarang (WIB)</div>
@@ -130,45 +130,10 @@
       </div>
 
       <div style="display:flex;flex-direction:column;gap:20px;min-width:0;">
-        <div class="card">
-          <div class="card-header" style="margin-bottom:4px;">
-            <span class="card-title">Info RT</span>
-            <span class="badge badge-green">Aktif</span>
-          </div>
-          <div class="card-body">
-            <div style="
-              background:linear-gradient(135deg,var(--blue-darker),var(--blue-primary));
-              border-radius:var(--radius-md);
-              padding:16px;
-              color:white;
-              margin-bottom:16px;
-              position:relative;
-              overflow:hidden;
-            ">
-              <div style="font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-0.5px;">RT 05</div>
-              <div style="font-size:13px;opacity:0.8;margin-top:2px;">Malabar Ujung</div>
-              <div style="position:absolute;right:-20px;top:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.08);"></div>
-            </div>
-            <div class="info-rows">
-              <div class="info-row">
-                <span class="info-row-label"><i class="ph ph-user-gear icon"></i> Ketua RT</span>
-                <span class="info-row-value">Pak Budi Santoso</span>
-              </div>
-              <div class="info-row">
-                <span class="info-row-label"><i class="ph ph-house icon"></i> Jumlah KK</span>
-                <span class="info-row-value">47 KK</span>
-              </div>
-              <div class="info-row">
-                <span class="info-row-label"><i class="ph ph-users icon"></i> Warga</span>
-                <span class="info-row-value">128 Orang</span>
-              </div>
-              <div class="info-row">
-                <span class="info-row-label"><i class="ph ph-map-pin icon"></i> Wilayah</span>
-                <span class="info-row-value">RW 03</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        @include('partials.info-rt-card', [
+          'profil' => $profilRt,
+          'showEditLink' => true,
+        ])
 
         <div class="card">
           <div class="card-header" style="margin-bottom:8px;">

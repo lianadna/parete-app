@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<div id="app">
+@include('partials.app-open')
 
   @if(session('success'))
     <div class="alert-banner info" style="margin-bottom:16px;">

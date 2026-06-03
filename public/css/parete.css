@@ -1171,6 +1171,83 @@ tbody tr:hover { background: var(--gray-50); }
 .info-row-label .icon { font-size: 15px; color: var(--blue-primary); }
 .info-row-value { font-size: 13px; font-weight: 600; color: var(--gray-800); }
 
+.info-rt-hero {
+  background: linear-gradient(135deg, var(--blue-darker), var(--blue-primary));
+  border-radius: var(--radius-md);
+  padding: 16px;
+  color: white;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.info-rt-hero-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.info-rt-hero-sub {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.info-rt-hero-glow {
+  position: absolute;
+  right: -20px;
+  top: -20px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.profil-rt-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.profil-rt-preview {
+  position: sticky;
+  top: 20px;
+}
+
+.profil-rt-form-card .card-body {
+  padding-top: 8px;
+}
+
+.profil-rt-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profil-rt-form-row-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 960px) {
+  .profil-rt-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profil-rt-preview {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .profil-rt-form-row-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ─── Modal ──────────────────────────────────────── */
 .modal-overlay {
   position: fixed;

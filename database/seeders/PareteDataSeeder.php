@@ -2,11 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\Admin;
 use App\Models\DataWarga;
 use App\Models\DokumenRt;
 use App\Models\InformasiRt;
 use App\Models\LogAktivitasAdmin;
 use App\Models\PengaduanWarga;
+use App\Models\ProfilRt;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Config;
@@ -25,6 +27,16 @@ class PareteDataSeeder extends Seeder
         DokumenRt::query()->delete();
 
         LogAktivitasAdmin::query()->delete();
+        ProfilRt::query()->delete();
+        Admin::query()->delete();
+
+        ProfilRt::query()->create(array_merge(['kunci' => 'utama'], ProfilRt::defaultValues()));
+
+        Admin::query()->create([
+            'username' => 'admin',
+            'password' => 'admin123',
+            'nama' => 'Super Admin',
+        ]);
 
         DataWarga::factory(15)->create();
 

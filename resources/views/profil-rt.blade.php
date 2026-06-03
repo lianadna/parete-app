@@ -26,19 +26,7 @@
     </div>
   </div>
 
-  <div class="profil-rt-layout">
-    <div class="profil-rt-preview">
-      <div style="font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;">Pratinjau kartu</div>
-      @include('partials.info-rt-card', [
-        'profil' => $profil,
-        'cardId' => 'infoRtPreview',
-      ])
-      <p style="font-size:12px;color:var(--gray-400);margin-top:10px;line-height:1.6;">
-        Kartu ini ditampilkan di dashboard dan hanya menampilkan data yang Anda isi di form profil RT.
-      </p>
-    </div>
-
-    <div class="card profil-rt-form-card">
+  <div class="card profil-rt-form-card">
       <div class="card-header">
         <span class="card-title"><i class="ph ph-gear" style="margin-right:6px;"></i> Pengaturan Profil</span>
       </div>
@@ -50,44 +38,44 @@
           <div class="profil-rt-form-grid">
             <div class="form-group">
               <label class="form-label" for="nama_ketua_rt"><i class="ph ph-user-gear" style="margin-right:4px;color:var(--blue-primary);"></i> Nama Ketua RT *</label>
-              <input type="text" id="nama_ketua_rt" name="nama_ketua_rt" class="form-control-plain" value="{{ old('nama_ketua_rt', $profil->nama_ketua_rt) }}" required maxlength="120" data-preview-field="nama_ketua_rt" />
+              <input type="text" id="nama_ketua_rt" name="nama_ketua_rt" class="form-control-plain" value="{{ old('nama_ketua_rt', $profil->nama_ketua_rt) }}" required maxlength="120" />
             </div>
 
             <div class="form-group profil-rt-form-row-2">
               <div>
                 <label class="form-label" for="nomor_rt"><i class="ph ph-house" style="margin-right:4px;color:var(--blue-primary);"></i> Nomor RT *</label>
-                <input type="text" id="nomor_rt" name="nomor_rt" class="form-control-plain" value="{{ old('nomor_rt', $profil->nomor_rt) }}" required maxlength="3" inputmode="numeric" pattern="\d{1,3}" data-preview-field="nomor_rt" />
+                <input type="text" id="nomor_rt" name="nomor_rt" class="form-control-plain" value="{{ old('nomor_rt', $profil->nomor_rt) }}" required maxlength="3" inputmode="numeric" pattern="\d{1,3}" />
               </div>
               <div>
                 <label class="form-label" for="nomor_rw"><i class="ph ph-map-pin" style="margin-right:4px;color:var(--blue-primary);"></i> Nomor RW *</label>
-                <input type="text" id="nomor_rw" name="nomor_rw" class="form-control-plain" value="{{ old('nomor_rw', $profil->nomor_rw) }}" required maxlength="3" inputmode="numeric" pattern="\d{1,3}" data-preview-field="nomor_rw" />
+                <input type="text" id="nomor_rw" name="nomor_rw" class="form-control-plain" value="{{ old('nomor_rw', $profil->nomor_rw) }}" required maxlength="3" inputmode="numeric" pattern="\d{1,3}" />
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="kelurahan"><i class="ph ph-buildings" style="margin-right:4px;color:var(--blue-primary);"></i> Kelurahan *</label>
-              <input type="text" id="kelurahan" name="kelurahan" class="form-control-plain" value="{{ old('kelurahan', $profil->kelurahan) }}" required maxlength="120" data-preview-field="kelurahan" />
+              <input type="text" id="kelurahan" name="kelurahan" class="form-control-plain" value="{{ old('kelurahan', $profil->kelurahan) }}" required maxlength="120" />
             </div>
 
             <div class="form-group">
               <label class="form-label" for="kecamatan"><i class="ph ph-map-trifold" style="margin-right:4px;color:var(--blue-primary);"></i> Kecamatan *</label>
-              <input type="text" id="kecamatan" name="kecamatan" class="form-control-plain" value="{{ old('kecamatan', $profil->kecamatan) }}" required maxlength="120" data-preview-field="kecamatan" />
+              <input type="text" id="kecamatan" name="kecamatan" class="form-control-plain" value="{{ old('kecamatan', $profil->kecamatan) }}" required maxlength="120" />
             </div>
 
             <div class="form-group profil-rt-form-row-2">
               <div>
                 <label class="form-label" for="kota"><i class="ph ph-city" style="margin-right:4px;color:var(--blue-primary);"></i> Kota *</label>
-                <input type="text" id="kota" name="kota" class="form-control-plain" value="{{ old('kota', $profil->kota) }}" required maxlength="120" data-preview-field="kota" />
+                <input type="text" id="kota" name="kota" class="form-control-plain" value="{{ old('kota', $profil->kota) }}" required maxlength="120" />
               </div>
               <div>
                 <label class="form-label" for="provinsi"><i class="ph ph-globe-hemisphere-west" style="margin-right:4px;color:var(--blue-primary);"></i> Provinsi *</label>
-                <input type="text" id="provinsi" name="provinsi" class="form-control-plain" value="{{ old('provinsi', $profil->provinsi) }}" required maxlength="120" data-preview-field="provinsi" />
+                <input type="text" id="provinsi" name="provinsi" class="form-control-plain" value="{{ old('provinsi', $profil->provinsi) }}" required maxlength="120" />
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="kode_pos"><i class="ph ph-mailbox" style="margin-right:4px;color:var(--blue-primary);"></i> Kode Pos *</label>
-              <input type="text" id="kode_pos" name="kode_pos" class="form-control-plain" value="{{ old('kode_pos', $profil->kode_pos) }}" required maxlength="5" inputmode="numeric" pattern="\d{5}" data-preview-field="kode_pos" style="max-width:160px;" />
+              <input type="text" id="kode_pos" name="kode_pos" class="form-control-plain" value="{{ old('kode_pos', $profil->kode_pos) }}" required maxlength="5" inputmode="numeric" pattern="\d{5}" style="max-width:160px;" />
             </div>
           </div>
 
@@ -98,50 +86,11 @@
         </form>
       </div>
     </div>
-  </div>
 </div>
 
 <script src="{{ asset('js/parete.js') }}"></script>
 <script>
   initLayout('profil-rt', 'Profil RT');
-
-  (function profilRtPreview() {
-    const card = document.getElementById('infoRtPreview');
-    const form = document.getElementById('formProfilRt');
-    if (!card || !form) return;
-
-    const padRt = (n) => {
-      const v = String(n || '').replace(/\D/g, '');
-      return v ? 'RT ' + v.padStart(2, '0') : 'RT —';
-    };
-    const padRw = (n) => {
-      const v = String(n || '').replace(/\D/g, '');
-      return v ? 'RW ' + v.padStart(2, '0') : 'RW —';
-    };
-
-    const setPreview = (key, value) => {
-      card.querySelectorAll('[data-preview="' + key + '"]').forEach((el) => {
-        el.textContent = value;
-      });
-    };
-
-    const sync = () => {
-      const data = Object.fromEntries(new FormData(form));
-      setPreview('nama_ketua_rt', data.nama_ketua_rt || '—');
-      setPreview('kelurahan', data.kelurahan || '—');
-      setPreview('kecamatan', data.kecamatan || '—');
-      setPreview('kota', data.kota || '—');
-      setPreview('provinsi', data.provinsi || '—');
-      setPreview('kode_pos', data.kode_pos || '—');
-      setPreview('labelRt', padRt(data.nomor_rt));
-      setPreview('labelRw', padRw(data.nomor_rw));
-    };
-
-    form.querySelectorAll('[data-preview-field]').forEach((input) => {
-      input.addEventListener('input', sync);
-    });
-    sync();
-  })();
 </script>
 </body>
 </html>

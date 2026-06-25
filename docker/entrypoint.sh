@@ -3,6 +3,10 @@ set -e
 
 cd /var/www/html
 
+PORT="${PORT:-8080}"
+sed -i "s/listen 8080;/listen ${PORT};/" /etc/nginx/conf.d/default.conf
+sed -i "s/listen \\[::\\]:8080;/listen [::]:${PORT};/" /etc/nginx/conf.d/default.conf
+
 mkdir -p /data/db
 if [ ! -f /data/db/.initialized ]; then
   mongod --dbpath /data/db --bind_ip 127.0.0.1 --port 27017 --fork --logpath /var/log/mongodb.log
